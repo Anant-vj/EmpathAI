@@ -5,10 +5,14 @@ import FloatingMindMate from './FloatingMindMate';
 import EmergencyButton from './EmergencyButton';
 import Settings from './Settings';
 import MobileProfileSetup from './MobileProfileSetup';
+import LearningMode from './LearningMode';
+import TextToSignTranslator from './TextToSignTranslator';
 
 function AppContent() {
   const [showSettings, setShowSettings] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showLearning, setShowLearning] = useState(false);
+  const [showTextToSign, setShowTextToSign] = useState(false);
   const [emotionalMessage, setEmotionalMessage] = useState('');
   const [userProfile, setUserProfile] = useState(null);
   const { isDark } = useTheme();
@@ -41,6 +45,14 @@ function AppContent() {
           </div>
           <div className="flex items-center space-x-2">
             <button
+              onClick={() => setShowLearning(true)}
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              aria-label="Learning Mode"
+              title="ASL/ISL Learning"
+            >
+              <span className="text-2xl">📖</span>
+            </button>
+            <button
               onClick={() => setShowProfile(true)}
               className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               aria-label="Profile Setup"
@@ -64,7 +76,10 @@ function AppContent() {
       </div>
 
       {/* Main Content */}
-      <div className="pt-20">
+      <div className="pt-20 pb-6 space-y-6">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <TextToSignTranslator />
+        </div>
         <MobileTranslator onWellnessPrompt={handleWellnessPrompt} />
       </div>
 
@@ -79,6 +94,9 @@ function AppContent() {
         onClose={() => setShowProfile(false)}
         onSave={handleProfileSave}
       />
+      {showLearning && (
+        <LearningMode onClose={() => setShowLearning(false)} />
+      )}
     </div>
   );
 }
