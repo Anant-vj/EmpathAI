@@ -22,6 +22,7 @@ function MobileTranslator({ onWellnessPrompt }) {
   const [detectedEmotion, setDetectedEmotion] = useState('');
   const [showVoiceSelector, setShowVoiceSelector] = useState(false);
   const [selectedVoiceConfig, setSelectedVoiceConfig] = useState(null);
+  const [isStartingCamera, setIsStartingCamera] = useState(false);
   
   const { isDark } = useTheme();
 
@@ -90,13 +91,23 @@ function MobileTranslator({ onWellnessPrompt }) {
     }
   }, []);
 
+  useEffect(() => {
+    if (isActive && gestureRecognizer && videoRef.current) {
+      detectGestures();
+    }
+  }, [isActive, gestureRecognizer]);
+
   const speak = (text) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       
       if (selectedVoiceConfig) {
-        utterance.voice = selectedVoiceConfig.voice;
+        const voices = window.speechSynthesis.getVoices();
+        const selectedVoice = voices.find(v => v.name === selectedVoiceConfig.voiceName);
+        if (selectedVoice) {
+          utterance.voice = selectedVoice;
+        }
         utterance.pitch = selectedVoiceConfig.pitch;
         utterance.rate = selectedVoiceConfig.rate;
       } else {
@@ -181,7 +192,12 @@ function MobileTranslator({ onWellnessPrompt }) {
   };
 
   const startCamera = async () => {
+    if (isStartingCamera) return;
+    
     try {
+      setIsStartingCamera(true);
+      setError('');
+      
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
           facingMode: 'user',
@@ -192,16 +208,21 @@ function MobileTranslator({ onWellnessPrompt }) {
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current.play();
+        
+        try {
+          await videoRef.current.play();
           setIsActive(true);
-          setError('');
-          detectGestures();
-        };
+        } catch (playErr) {
+          console.error('Video play error:', playErr);
+          setError('Unable to start video. Please try again.');
+          stream.getTracks().forEach(track => track.stop());
+        }
       }
     } catch (err) {
       console.error('Camera error:', err);
       setError('Unable to access camera. Please grant camera permissions.');
+    } finally {
+      setIsStartingCamera(false);
     }
   };
 
@@ -361,10 +382,10 @@ function MobileTranslator({ onWellnessPrompt }) {
               {!isActive ? (
                 <button
                   onClick={startCamera}
-                  disabled={!gestureRecognizer}
+                  disabled={!gestureRecognizer || isStartingCamera}
                   className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-lg font-medium hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed transition-all shadow-lg text-lg"
                 >
-                  {gestureRecognizer ? '🎥 Start Camera' : 'Loading...'}
+                  {isStartingCamera ? '⏳ Starting Camera...' : gestureRecognizer ? '🎥 Start Camera' : 'Loading...'}
                 </button>
               ) : (
                 <button

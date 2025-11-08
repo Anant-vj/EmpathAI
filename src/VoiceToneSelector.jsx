@@ -23,9 +23,9 @@ function VoiceToneSelector({ currentVoice, onSelect, onClose }) {
       };
 
       setVoices([
-        { id: 'friendly', name: 'Friendly & Warm', voice: voiceCategories.friendly, pitch: 1.2, rate: 1.0, icon: '😊' },
-        { id: 'professional', name: 'Professional & Clear', voice: voiceCategories.professional, pitch: 1.0, rate: 0.95, icon: '💼' },
-        { id: 'calm', name: 'Calm & Soothing', voice: voiceCategories.calm, pitch: 0.9, rate: 0.85, icon: '🧘' }
+        { id: 'friendly', name: 'Friendly & Warm', voiceName: voiceCategories.friendly?.name, pitch: 1.2, rate: 1.0, icon: '😊' },
+        { id: 'professional', name: 'Professional & Clear', voiceName: voiceCategories.professional?.name, pitch: 1.0, rate: 0.95, icon: '💼' },
+        { id: 'calm', name: 'Calm & Soothing', voiceName: voiceCategories.calm?.name, pitch: 0.9, rate: 0.85, icon: '🧘' }
       ]);
     };
 
@@ -38,7 +38,11 @@ function VoiceToneSelector({ currentVoice, onSelect, onClose }) {
 
   const testVoice = (voiceConfig) => {
     const utterance = new SpeechSynthesisUtterance('Hello! This is how I sound.');
-    utterance.voice = voiceConfig.voice;
+    const voices = window.speechSynthesis.getVoices();
+    const voice = voices.find(v => v.name === voiceConfig.voiceName);
+    if (voice) {
+      utterance.voice = voice;
+    }
     utterance.pitch = voiceConfig.pitch;
     utterance.rate = voiceConfig.rate;
     window.speechSynthesis.cancel();
@@ -47,8 +51,16 @@ function VoiceToneSelector({ currentVoice, onSelect, onClose }) {
 
   const handleSelect = (voiceConfig) => {
     setSelectedVoice(voiceConfig);
-    localStorage.setItem('selectedVoice', JSON.stringify(voiceConfig));
-    onSelect(voiceConfig);
+    const saveConfig = {
+      id: voiceConfig.id,
+      name: voiceConfig.name,
+      voiceName: voiceConfig.voiceName,
+      pitch: voiceConfig.pitch,
+      rate: voiceConfig.rate,
+      icon: voiceConfig.icon
+    };
+    localStorage.setItem('selectedVoice', JSON.stringify(saveConfig));
+    onSelect(saveConfig);
   };
 
   return (
@@ -94,7 +106,7 @@ function VoiceToneSelector({ currentVoice, onSelect, onClose }) {
                       {voiceConfig.name}
                     </h3>
                     <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {voiceConfig.voice?.name || 'Default'}
+                      {voiceConfig.voiceName || 'Default'}
                     </p>
                   </div>
                 </div>
