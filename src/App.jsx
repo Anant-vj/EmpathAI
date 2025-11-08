@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Translator from './Translator';
+import EnhancedTranslator from './EnhancedTranslator';
 import Chat from './Chat';
 
 function App() {
@@ -10,7 +10,7 @@ function App() {
       <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
         <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
           <h1 className="text-3xl font-bold mb-2">💎 EmpathAI</h1>
-          <p className="text-indigo-100">Your Companion for Communication & Support</p>
+          <p className="text-indigo-100">Your AI-Powered Communication & Support Companion</p>
         </div>
 
         <div className="flex border-b border-gray-200">
@@ -37,7 +37,7 @@ function App() {
         </div>
 
         <div className="p-6">
-          {activeTab === 'chat' ? <Chat /> : <Translator />}
+          {activeTab === 'chat' ? <Chat /> : <EnhancedTranslator />}
         </div>
       </div>
     </div>
