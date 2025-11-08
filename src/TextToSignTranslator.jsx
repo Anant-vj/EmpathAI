@@ -15,7 +15,7 @@ function TextToSignTranslator() {
     const words = inputText.trim().split(/\s+/);
     
     const signPromises = words.map(async (word) => {
-      const giphyKey = process.env.GIPHY_API_KEY || 'demo_api_key';
+      const giphyKey = import.meta.env.VITE_GIPHY_API_KEY || 'demo_api_key';
       try {
         const response = await fetch(
           `https://api.giphy.com/v1/gifs/search?api_key=${giphyKey}&q=ASL+sign+language+${word}&limit=1&rating=g`

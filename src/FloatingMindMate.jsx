@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTheme } from './ThemeContext';
+import { detectCrisis, getCrisisResponse } from './CrisisDetector';
+import PersonalitySelector from './PersonalitySelector';
 
 function FloatingMindMate({ initialMessage = '' }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,6 +14,9 @@ function FloatingMindMate({ initialMessage = '' }) {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [sessionId, setSessionId] = useState(null);
+  const [personality, setPersonality] = useState('listener');
+  const [showPersonalitySelector, setShowPersonalitySelector] = useState(false);
   const messagesEndRef = useRef(null);
   const { isDark } = useTheme();
 
@@ -29,14 +34,37 @@ function FloatingMindMate({ initialMessage = '' }) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const createSession = async () => {
+    try {
+      const response = await fetch('/api/sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: 'anonymous', personality }),
+      });
+      const data = await response.json();
+      setSessionId(data.id);
+    } catch (error) {
+      console.error('Session creation error:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen && !sessionId) {
+      createSession();
+    }
+  }, [isOpen]);
+
   const handleSendMessage = async (customMessage = null) => {
     const messageText = customMessage || input.trim();
     if (!messageText || loading) return;
 
+    const hasCrisis = detectCrisis(messageText);
+
     const userMessage = {
       role: 'user',
       content: messageText,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      hasCrisis
     };
 
     setMessages(prev => [...prev, userMessage]);
@@ -44,10 +72,26 @@ function FloatingMindMate({ initialMessage = '' }) {
     setLoading(true);
 
     try {
+      if (hasCrisis) {
+        const crisisResponse = getCrisisResponse('india');
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: crisisResponse.message,
+          timestamp: new Date().toISOString(),
+          isCrisis: true
+        }]);
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: messageText }),
+        body: JSON.stringify({ 
+          message: messageText,
+          personality,
+          sessionId
+        }),
       });
 
       if (!response.ok) {
@@ -113,14 +157,23 @@ function FloatingMindMate({ initialMessage = '' }) {
                 <p className="text-indigo-100 text-xs">Your AI Companion</p>
               </div>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="text-white/80 hover:text-white transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setShowPersonalitySelector(true)}
+                className="text-white/80 hover:text-white transition-colors"
+                title="Change Personality"
+              >
+                <span className="text-lg">🎭</span>
+              </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-white/80 hover:text-white transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           <div className={`flex-1 overflow-y-auto p-4 space-y-3 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
@@ -132,9 +185,13 @@ function FloatingMindMate({ initialMessage = '' }) {
                 <div
                   className={`max-w-[80%] rounded-2xl px-4 py-2 ${
                     msg.role === 'user'
-                      ? 'bg-indigo-600 text-white'
+                      ? msg.hasCrisis
+                        ? 'bg-red-600 text-white border-2 border-red-400'
+                        : 'bg-indigo-600 text-white'
                       : msg.isError
                       ? 'bg-red-100 text-red-800'
+                      : msg.isCrisis
+                      ? 'bg-amber-50 text-amber-900 border-2 border-amber-400'
                       : isDark
                       ? 'bg-gray-800 text-gray-100 border border-gray-700'
                       : 'bg-white text-gray-800 shadow'
@@ -142,7 +199,7 @@ function FloatingMindMate({ initialMessage = '' }) {
                 >
                   <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                   <p className={`text-xs mt-1 ${
-                    msg.role === 'user' ? 'text-indigo-200' : isDark ? 'text-gray-500' : 'text-gray-400'
+                    msg.role === 'user' ? 'text-indigo-200' : msg.isCrisis ? 'text-amber-700' : isDark ? 'text-gray-500' : 'text-gray-400'
                   }`}>
                     {new Date(msg.timestamp).toLocaleTimeString()}
                   </p>
@@ -186,6 +243,22 @@ function FloatingMindMate({ initialMessage = '' }) {
             </div>
           </div>
         </div>
+      )}
+
+      {showPersonalitySelector && (
+        <PersonalitySelector
+          currentPersonality={personality}
+          onSelect={(newPersonality) => {
+            setPersonality(newPersonality);
+            setShowPersonalitySelector(false);
+            setMessages(prev => [...prev, {
+              role: 'assistant',
+              content: `Personality updated! I'm now your ${newPersonality === 'listener' ? 'Soft Listener 👂' : newPersonality === 'coach' ? 'Encouraging Coach 💪' : 'Calm Counselor 🧘'}. How can I support you?`,
+              timestamp: new Date().toISOString()
+            }]);
+          }}
+          onClose={() => setShowPersonalitySelector(false)}
+        />
       )}
     </>
   );

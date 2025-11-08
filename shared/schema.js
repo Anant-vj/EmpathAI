@@ -15,8 +15,3 @@ export const chatMessages = pgTable('chat_messages', {
   timestamp: timestamp('timestamp').defaultNow(),
   hasCrisis: boolean('has_crisis').default(false),
 });
-
-export type ChatSession = typeof chatSessions.$inferSelect;
-export type InsertChatSession = typeof chatSessions.$inferInsert;
-export type ChatMessage = typeof chatMessages.$inferSelect;
-export type InsertChatMessage = typeof chatMessages.$inferInsert;
