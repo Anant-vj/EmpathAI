@@ -143,7 +143,7 @@ function TextToSignTranslator() {
             ))}
           </div>
           <p className={`text-xs mt-3 text-center ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-            Powered by GIPHY
+            Powered by Tenor
           </p>
         </div>
       )}
