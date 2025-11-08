@@ -3,16 +3,21 @@ import { GestureRecognizer, FilesetResolver } from '@mediapipe/tasks-vision';
 import { useTheme } from './ThemeContext';
 
 const ASL_VOCABULARY = [
-  { word: 'Hello', gesture: 'Open_Palm', description: 'Open palm wave' },
-  { word: 'Thank You', gesture: 'Open_Palm', description: 'Open palm from chin outward' },
-  { word: 'I Love You', gesture: 'ILoveYou', description: 'Thumb, index, and pinky extended' },
-  { word: 'Yes', gesture: 'Closed_Fist', description: 'Fist nodding motion' },
-  { word: 'No', gesture: 'Pointing_Up', description: 'Index and middle fingers close like scissors' },
-  { word: 'Please', gesture: 'Open_Palm', description: 'Open palm circling chest' },
-  { word: 'Sorry', gesture: 'Closed_Fist', description: 'Fist circling chest' },
-  { word: 'Help', gesture: 'Thumb_Up', description: 'Thumbs up on open palm' },
-  { word: 'Good', gesture: 'Thumb_Up', description: 'Thumbs up' },
-  { word: 'Victory', gesture: 'Victory', description: 'Peace sign / V shape' }
+  { word: 'A (Letter)', gesture: 'Closed_Fist', description: 'Closed fist with thumb to the side', emoji: '✊' },
+  { word: 'B (Letter)', gesture: 'Open_Palm', description: 'Open palm, fingers together', emoji: '✋' },
+  { word: 'Number 1', gesture: 'Pointing_Up', description: 'Index finger pointing up', emoji: '☝️' },
+  { word: 'Number 2', gesture: 'Victory', description: 'Index and middle finger extended (peace sign)', emoji: '✌️' },
+  { word: 'Number 5', gesture: 'Open_Palm', description: 'All five fingers extended', emoji: '🖐️' },
+  { word: 'Hello/Hi', gesture: 'Open_Palm', description: 'Open palm waving motion', emoji: '👋' },
+  { word: 'Thank You', gesture: 'Open_Palm', description: 'Open palm from chin outward', emoji: '🙏' },
+  { word: 'I Love You', gesture: 'ILoveYou', description: 'Thumb, index, and pinky extended', emoji: '🤟' },
+  { word: 'Good/Thumbs Up', gesture: 'Thumb_Up', description: 'Thumbs up gesture', emoji: '👍' },
+  { word: 'Yes/Agree', gesture: 'Closed_Fist', description: 'Fist nodding motion', emoji: '✊' },
+  { word: 'Help/Support', gesture: 'Thumb_Up', description: 'Thumbs up on open palm', emoji: '🤝' },
+  { word: 'Please/Request', gesture: 'Open_Palm', description: 'Open palm circling chest', emoji: '🙏' },
+  { word: 'Sorry/Apologize', gesture: 'Closed_Fist', description: 'Fist circling over heart', emoji: '😔' },
+  { word: 'Peace/Victory', gesture: 'Victory', description: 'Peace sign / V shape', emoji: '✌️' },
+  { word: 'Stop/Wait', gesture: 'Open_Palm', description: 'Open palm facing forward', emoji: '✋' }
 ];
 
 function LearningMode({ onClose }) {
@@ -186,7 +191,7 @@ function LearningMode({ onClose }) {
         </div>
         
         <div className={`p-8 rounded-2xl ${isDark ? 'bg-gray-700' : 'bg-gradient-to-br from-indigo-50 to-purple-50'} mb-6`}>
-          <div className="text-6xl mb-4 text-center">🤟</div>
+          <div className="text-6xl mb-4 text-center">{currentCard.emoji}</div>
           <h3 className={`text-3xl font-bold text-center mb-4 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
             {currentCard.word}
           </h3>

@@ -150,6 +150,34 @@ app.get('/api/sessions/:sessionId/messages', async (req, res) => {
   }
 });
 
+app.get('/api/tenor/search', async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q) {
+      return res.status(400).json({ error: 'Query parameter q is required' });
+    }
+
+    const tenorKey = process.env.TENOR_API_KEY;
+    if (!tenorKey) {
+      return res.status(500).json({ error: 'Tenor API key not configured' });
+    }
+
+    const response = await fetch(
+      `https://tenor.googleapis.com/v2/search?q=ASL sign language ${q}&key=${tenorKey}&client_key=empathai&limit=1&media_filter=gif`
+    );
+
+    if (!response.ok) {
+      throw new Error('Tenor API request failed');
+    }
+
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('Tenor API Error:', error.message);
+    res.status(500).json({ error: 'Failed to fetch GIFs from Tenor' });
+  }
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'EmpathAI backend is running' });
 });

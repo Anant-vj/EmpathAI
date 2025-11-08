@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { GestureRecognizer, FilesetResolver, DrawingUtils } from '@mediapipe/tasks-vision';
 import { detectSentiment } from './SentimentDetector';
 import { useTheme } from './ThemeContext';
+import VoiceToneSelector from './VoiceToneSelector';
 
 function MobileTranslator({ onWellnessPrompt }) {
   const videoRef = useRef(null);
@@ -19,6 +20,8 @@ function MobileTranslator({ onWellnessPrompt }) {
   const [conversationHistory, setConversationHistory] = useState([]);
   const [showWellnessPrompt, setShowWellnessPrompt] = useState(false);
   const [detectedEmotion, setDetectedEmotion] = useState('');
+  const [showVoiceSelector, setShowVoiceSelector] = useState(false);
+  const [selectedVoiceConfig, setSelectedVoiceConfig] = useState(null);
   
   const { isDark } = useTheme();
 
@@ -76,12 +79,31 @@ function MobileTranslator({ onWellnessPrompt }) {
     };
   }, []);
 
+  useEffect(() => {
+    const savedVoice = localStorage.getItem('selectedVoice');
+    if (savedVoice) {
+      try {
+        setSelectedVoiceConfig(JSON.parse(savedVoice));
+      } catch (e) {
+        console.error('Failed to load saved voice:', e);
+      }
+    }
+  }, []);
+
   const speak = (text) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
+      
+      if (selectedVoiceConfig) {
+        utterance.voice = selectedVoiceConfig.voice;
+        utterance.pitch = selectedVoiceConfig.pitch;
+        utterance.rate = selectedVoiceConfig.rate;
+      } else {
+        utterance.rate = 0.9;
+        utterance.pitch = 1;
+      }
+      
       utterance.volume = 1;
       window.speechSynthesis.speak(utterance);
     }
@@ -90,21 +112,38 @@ function MobileTranslator({ onWellnessPrompt }) {
   const handleAutoResponse = async (gesture) => {
     if (!autoResponseMode || !userProfile) return;
 
+    const gestureMap = {
+      'Thumb_Up': 'good',
+      'Thumbs_Up': 'good',
+      'Open_Palm': 'hello',
+      'Pointing_Up': 'question',
+      'Victory': 'peace',
+      'ILoveYou': 'love',
+      'Closed_Fist': 'agree'
+    };
+
+    const mappedGesture = gestureMap[gesture] || gesture.toLowerCase();
+
     const responses = {
+      'good': userProfile.greeting || `That's great! I'm ${userProfile.name || 'happy to help'}!`,
       'hello': userProfile.greeting || `Hello! My name is ${userProfile.name || 'there'}. Nice to meet you!`,
       'introduce': userProfile.introduction || `My name is ${userProfile.name}. ${userProfile.about || 'Pleased to meet you!'}`,
       'greeting': userProfile.greeting || 'Hello! How are you?',
+      'palm': userProfile.greeting || 'Hi there! Good to see you!',
       'thanks': 'You\'re welcome! Happy to help.',
-      'help': 'I\'m here to assist. What do you need?'
+      'thank': 'You\'re welcome! Happy to help.',
+      'help': 'I\'m here to assist. What do you need?',
+      'question': 'Do you need help with something?',
+      'peace': 'Peace to you too! How can I assist?',
+      'love': 'I appreciate you! How can I help today?',
+      'agree': 'Great! What would you like to do?'
     };
 
-    const gestureLower = gesture.toLowerCase();
-    
     for (const [key, response] of Object.entries(responses)) {
-      if (gestureLower.includes(key)) {
+      if (mappedGesture.includes(key)) {
         speak(response);
         setConversationHistory(prev => [...prev, { gesture, response, timestamp: Date.now() }]);
-        break;
+        return;
       }
     }
   };
@@ -337,26 +376,51 @@ function MobileTranslator({ onWellnessPrompt }) {
               )}
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-indigo-50 dark:bg-gray-700 rounded-lg">
-              <span className={`font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-                🤖 Auto-Response Mode
-              </span>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-4 bg-indigo-50 dark:bg-gray-700 rounded-lg">
+                <span className={`font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                  🤖 Auto-Response Mode
+                </span>
+                <button
+                  onClick={() => setAutoResponseMode(!autoResponseMode)}
+                  disabled={!userProfile}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    autoResponseMode ? 'bg-indigo-600' : 'bg-gray-300'
+                  } ${!userProfile && 'opacity-50 cursor-not-allowed'}`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      autoResponseMode ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+
               <button
-                onClick={() => setAutoResponseMode(!autoResponseMode)}
-                disabled={!userProfile}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  autoResponseMode ? 'bg-indigo-600' : 'bg-gray-300'
-                } ${!userProfile && 'opacity-50 cursor-not-allowed'}`}
+                onClick={() => setShowVoiceSelector(true)}
+                className="w-full flex items-center justify-between p-4 bg-purple-50 dark:bg-gray-700 rounded-lg hover:bg-purple-100 dark:hover:bg-gray-600 transition-colors"
               >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    autoResponseMode ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-                />
+                <span className={`font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                  🗣️ Voice Tone
+                </span>
+                <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  {selectedVoiceConfig?.name || 'Default'}
+                </span>
               </button>
             </div>
           </div>
         </div>
+
+        {showVoiceSelector && (
+          <VoiceToneSelector
+            currentVoice={selectedVoiceConfig}
+            onSelect={(voice) => {
+              setSelectedVoiceConfig(voice);
+              setShowVoiceSelector(false);
+            }}
+            onClose={() => setShowVoiceSelector(false)}
+          />
+        )}
 
         {showWellnessPrompt && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">

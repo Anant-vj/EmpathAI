@@ -15,17 +15,14 @@ function TextToSignTranslator() {
     const words = inputText.trim().split(/\s+/);
     
     const signPromises = words.map(async (word) => {
-      const giphyKey = import.meta.env.VITE_GIPHY_API_KEY || 'demo_api_key';
       try {
-        const response = await fetch(
-          `https://api.giphy.com/v1/gifs/search?api_key=${giphyKey}&q=ASL+sign+language+${word}&limit=1&rating=g`
-        );
+        const response = await fetch(`/api/tenor/search?q=${encodeURIComponent(word)}`);
         const data = await response.json();
         
-        if (data.data && data.data[0]) {
+        if (data.results && data.results[0]) {
           return {
             word,
-            gifUrl: data.data[0].images.fixed_height.url
+            gifUrl: data.results[0].media_formats.gif.url
           };
         }
         return { word, gifUrl: null };
