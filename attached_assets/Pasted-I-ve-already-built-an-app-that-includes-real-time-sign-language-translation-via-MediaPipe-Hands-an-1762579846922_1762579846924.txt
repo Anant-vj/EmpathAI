@@ -1,0 +1,25 @@
+I’ve already built an app that includes real-time sign language translation (via MediaPipe Hands) and an embedded AI chat assistant (MindMate) in a separate chat tab. Right now, the assistant only appears when the user manually navigates to the chat. I want you to upgrade the system to implement Integrated Wellness Mode (Option 3).
+
+Specifically:
+
+Detect negative sentiment in the translated sign output. If the user signs something like “I’m sad,” “I feel anxious,” or similar phrases, the app should recognize this.
+When negative sentiment is detected, automatically display a soft prompt (e.g., banner or modal) in the Translator tab:
+“MindMate noticed you might need emotional support. Would you like to talk?”
+Include Yes / No buttons.
+If the user clicks Yes, automatically:
+Navigate to the Chat (MindMate) component
+Prefill the first message with the detected emotional phrase or a friendly starter like:
+“I just translated the message: ‘I feel lonely.’ Can you help me?”
+If the user clicks No, dismiss the suggestion.
+Maintain a clean, React-friendly architecture. Use proper state management to:
+Pass the sign-translated phrase to the sentiment analyzer
+Trigger the UI prompt conditionally
+Pass context into the AI chat window (via props or global state)
+You can use a simple keyword-based sentiment detection (e.g., check for words like “sad,” “anxious,” “stressed,” etc.).
+
+Don’t change the existing sign recognition logic or the chat backend. Only enhance the translator’s UI to detect emotions and initiate the MindMate flow automatically when appropriate.
+And can u make the app more better by having mind mate app being in the bottom right corner in a round shape(like that in many big apps as in whatsapp where we have cha with meta) and don't give the same exact output as that of whats app and give that ai a unique logo to mind mate and the app should have a same colour  and please remove the diamond symbol on top of empath ai and give the same yet a little different logo that has been given to mind mate 
+Since i asked u to create a fully functional and launchable app for a mobile phone and not laptop cuz its easily acccsessible only i the developer needs the option of training costom guestures . the user should only see the option of enbling auto response mode and setting up profile and collect enough data to hold a proper coversation on the users behalf but not too much that would make the user lose patience so there should be a few must fill sections and the rest left optional which can be filled later by the user 
+this shold be given i the top right corner with the setting of dark and light mose and save chat history in a seprate cloud in the given mail and emergency call to the close ones if the phone nuber is given and it can also be created as a small round call feature in the bottom left corner of the screen and make sure to adapt font colour based on the darke or light mode 
+And most impotant of all it converts sign to speech/text but i want it the other way around also and it should be fast so make sure to use the required api 
+i order to effeciently maximise the time in the converstion we can also integrate and fine tune the mind mate ai agent to predict and reply to the person hearing based of previous chats 
