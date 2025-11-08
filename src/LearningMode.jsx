@@ -30,6 +30,7 @@ function LearningMode({ onClose }) {
   const [gestureRecognizer, setGestureRecognizer] = useState(null);
   const [detectedGesture, setDetectedGesture] = useState('');
   const [showVideo, setShowVideo] = useState(false);
+  const [isStartingCamera, setIsStartingCamera] = useState(false);
   const videoRef = useRef(null);
   const animationFrameRef = useRef(null);
   const { isDark } = useTheme();
@@ -65,32 +66,60 @@ function LearningMode({ onClose }) {
     };
   }, []);
 
+  useEffect(() => {
+    if (showVideo && gestureRecognizer && !animationFrameRef.current) {
+      detectGestures();
+    }
+  }, [showVideo, gestureRecognizer]);
+
   const startCamera = async () => {
+    if (isStartingCamera) return;
+    
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      setIsStartingCamera(true);
+      setFeedback('');
+      
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'user', width: 640, height: 480 } 
+      });
+      
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        setShowVideo(true);
-        detectGestures();
+        
+        try {
+          await videoRef.current.play();
+          setShowVideo(true);
+        } catch (playErr) {
+          console.error('Video play error:', playErr);
+          setFeedback('❌ Unable to start video. Please try again.');
+          stream.getTracks().forEach(track => track.stop());
+        }
       }
     } catch (err) {
       console.error('Camera error:', err);
-      setFeedback('Unable to access camera');
+      setFeedback('❌ Unable to access camera. Please allow camera permissions and try again.');
+    } finally {
+      setIsStartingCamera(false);
     }
   };
 
   const stopCamera = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      videoRef.current.srcObject.getTracks().forEach(track => track.stop());
-    }
-    setShowVideo(false);
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
     }
+    
+    if (videoRef.current && videoRef.current.srcObject) {
+      videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    
+    setShowVideo(false);
+    setDetectedGesture('');
   };
 
   const detectGestures = () => {
-    if (!gestureRecognizer || !videoRef.current || !showVideo) return;
+    if (!gestureRecognizer || !videoRef.current) return;
 
     const video = videoRef.current;
     if (video.readyState === video.HAVE_ENOUGH_DATA) {
@@ -118,7 +147,6 @@ function LearningMode({ onClose }) {
 
   const handleQuizSubmit = () => {
     const currentWord = ASL_VOCABULARY[currentIndex];
-    stopCamera();
     setIsChecking(true);
 
     setTimeout(() => {
@@ -133,15 +161,17 @@ function LearningMode({ onClose }) {
       }
       setIsChecking(false);
       setDetectedGesture('');
-    }, 1000);
+    }, 500);
   };
 
   const handleQuizNext = () => {
+    setFeedback('');
+    setDetectedGesture('');
+    
     if (currentIndex < ASL_VOCABULARY.length - 1) {
       setCurrentIndex(currentIndex + 1);
-      setFeedback('');
-      setDetectedGesture('');
     } else {
+      stopCamera();
       alert(`Quiz Complete! Your score: ${score}/${ASL_VOCABULARY.length}`);
       setMode('menu');
       setCurrentIndex(0);
@@ -248,15 +278,16 @@ function LearningMode({ onClose }) {
           {!showVideo ? (
             <button
               onClick={startCamera}
-              className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg"
+              disabled={!gestureRecognizer || isStartingCamera}
+              className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              📹 Start Camera to Show Sign
+              {isStartingCamera ? '⏳ Starting Camera...' : gestureRecognizer ? '📹 Start Camera to Show Sign' : '⏳ Loading...'}
             </button>
           ) : (
             <div>
               <video
                 ref={videoRef}
-                className="w-full max-w-md mx-auto rounded-lg mb-4"
+                className="w-full max-w-md mx-auto rounded-lg mb-4 mirror-video"
                 autoPlay
                 playsInline
                 muted
@@ -269,20 +300,15 @@ function LearningMode({ onClose }) {
               <div className="flex gap-3 justify-center">
                 <button
                   onClick={handleQuizSubmit}
-                  disabled={isChecking}
+                  disabled={isChecking || !detectedGesture}
                   className="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors disabled:bg-gray-400"
                 >
                   {isChecking ? 'Checking...' : '✓ Check Answer'}
                 </button>
-                <button
-                  onClick={stopCamera}
-                  className={`px-6 py-3 rounded-lg font-medium transition-colors ${
-                    isDark ? 'bg-gray-600 hover:bg-gray-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
-                  }`}
-                >
-                  Stop Camera
-                </button>
               </div>
+              <p className={`text-xs mt-3 text-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                Camera will stay on for all questions. Show gesture and click Check Answer.
+              </p>
             </div>
           )}
         </div>

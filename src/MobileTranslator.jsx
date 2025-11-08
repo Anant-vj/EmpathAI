@@ -376,11 +376,24 @@ function MobileTranslator({ onWellnessPrompt }) {
               )}
             </div>
 
+            <div className={`mb-4 p-3 rounded-lg ${isDark ? 'bg-blue-900/30 border border-blue-700' : 'bg-blue-50 border border-blue-200'}`}>
+              <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-800'}`}>
+                💡 <strong>Tip:</strong> Scroll down to find Auto-Response Mode and Voice Tone settings below!
+              </p>
+            </div>
+
             <div className="space-y-3">
               <div className="flex items-center justify-between p-4 bg-indigo-50 dark:bg-gray-700 rounded-lg">
-                <span className={`font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-                  🤖 Auto-Response Mode
-                </span>
+                <div className="flex-1">
+                  <span className={`font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                    🤖 Auto-Response Mode
+                  </span>
+                  {!userProfile && (
+                    <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Set up profile in Settings ⚙️ first
+                    </p>
+                  )}
+                </div>
                 <button
                   onClick={() => setAutoResponseMode(!autoResponseMode)}
                   disabled={!userProfile}
@@ -400,11 +413,16 @@ function MobileTranslator({ onWellnessPrompt }) {
                 onClick={() => setShowVoiceSelector(true)}
                 className="w-full flex items-center justify-between p-4 bg-purple-50 dark:bg-gray-700 rounded-lg hover:bg-purple-100 dark:hover:bg-gray-600 transition-colors"
               >
-                <span className={`font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-                  🗣️ Voice Tone
-                </span>
+                <div className="flex-1 text-left">
+                  <span className={`font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                    🗣️ Voice Tone
+                  </span>
+                  <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Choose how AI speaks
+                  </p>
+                </div>
                 <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  {selectedVoiceConfig?.name || 'Default'}
+                  {selectedVoiceConfig?.name || 'Default'} →
                 </span>
               </button>
             </div>
