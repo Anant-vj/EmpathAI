@@ -1,14 +1,16 @@
-# 💎 EmpathAI - Enhanced Sign Language Translator & AI Companion
+# 💎 EmpathAI - Mobile-First Sign Language & Wellness Companion
 
 ## Overview
-EmpathAI is an advanced full-stack web application combining:
-1. **Enhanced Sign Language Translator** - Real-time gesture detection with custom training capabilities
-2. **MindMate Chat** - Empathetic AI companion with auto-response mode
-3. **Custom Gesture Training** - Train your own sign language gestures
-4. **Auto-Response System** - AI handles conversations automatically for hearing-impaired users
+EmpathAI is a mobile-first web application designed for hearing-impaired users, featuring:
+1. **Real-Time Sign Language Translation** - MediaPipe-powered gesture recognition with speech output
+2. **Floating MindMate Chat** - Empathetic AI companion accessible from anywhere (GPT-4o-mini)
+3. **Sentiment Detection & Wellness** - Detects negative emotions and offers AI support
+4. **Emergency Features** - Quick-access emergency calling with customizable contacts
+5. **Auto-Response Mode** - AI handles greetings/introductions automatically
+6. **Dark/Light Theme** - Accessible design with theme switching
 
-**Current State**: ✅ Fully functional with enhanced AI features
-**Last Updated**: November 8, 2025
+**Current State**: ✅ Production-ready mobile-first application
+**Last Updated**: November 8, 2025 (Major mobile redesign)
 
 ## Project Architecture
 
@@ -26,86 +28,101 @@ EmpathAI is an advanced full-stack web application combining:
 ### Project Structure
 ```
 /
-├── index.js                        # Express backend server
+├── index.js                        # Express backend server (OpenAI chat API)
 ├── package.json                    # Dependencies + scripts
 ├── vite.config.js                  # Vite bundler config
-├── tailwind.config.js              # TailwindCSS styling
+├── tailwind.config.js              # TailwindCSS with dark mode
 ├── postcss.config.js               # PostCSS config
 ├── index.html                      # HTML entry point
 ├── dist/                           # Built frontend (generated)
 └── src/
-    ├── index.jsx                   # React entry point
-    ├── App.jsx                     # Main app with tab switcher
-    ├── Chat.jsx                    # MindMate chat component
-    ├── EnhancedTranslator.jsx      # Enhanced sign translator
-    ├── CustomGestureTrainer.jsx    # Gesture training UI
-    ├── ProfileSetup.jsx            # User profile configuration
+    ├── index.jsx                   # React entry point (renders MobileApp)
+    ├── MobileApp.jsx               # Mobile-first single-page layout
+    ├── MobileTranslator.jsx        # Enhanced sign translator (main screen)
+    ├── FloatingMindMate.jsx        # Bottom-right chat widget
+    ├── ThemeContext.jsx            # Dark/light theme provider
+    ├── Settings.jsx                # Top-right settings panel
+    ├── SentimentDetector.js        # Emotion keyword detection
+    ├── SimplifiedProfile.jsx       # Streamlined profile setup
     └── styles.css                  # Global styles + Tailwind
 ```
 
-## 🌟 Enhanced Features
+## 🌟 Mobile-First Features
 
-### 1. MindMate Chat 💬
-- Real-time empathetic AI responses using GPT-4o-mini
-- Auto-response mode for automatic conversations
-- Clean, responsive chat interface with message history
-- Timestamp tracking and error handling
-- Auto-scroll to latest messages
-- Loading states with animated indicators
+### 1. Floating MindMate Chat Widget 💬
+- **Bottom-Right Widget**: Always accessible purple chat button with green online indicator
+- **Expandable Interface**: Click to expand full chat (minimize to continue translating)
+- **Empathetic AI**: GPT-4o-mini trained for compassionate, supportive responses
+- **Auto-scroll**: Latest messages automatically visible
+- **Wellness Integration**: Triggered by sentiment detection for mental health support
+- **Custom Branding**: Unique purple chat logo differentiates from main app logo
 
-### 2. Enhanced Sign Language Translator 🤟
+### 2. Sign Language Translation System 🤟
 
-#### Pretrained Gesture Recognition (MediaPipe)
-- Thumbs Up 👍, Victory ✌️, Open Palm ✋
-- Pointing Up ☝️, ILoveYou 🤟, Closed Fist ✊
-- Real-time hand landmark tracking (2 hands supported)
-- Visual overlay on video feed
-- Confidence score display
+#### Real-Time Gesture Recognition (MediaPipe)
+- **Pretrained Gestures**: Thumbs Up 👍, Victory ✌️, Open Palm ✋, Pointing Up ☝️, ILoveYou 🤟, Closed Fist ✊
+- **GPU/CPU Fallback**: Automatically switches to CPU if WebGL unavailable
+- **Hand Tracking**: Supports up to 2 hands simultaneously
+- **Visual Feedback**: Hand landmarks overlaid on video feed
+- **Speech Output**: Text-to-speech for detected gestures
+- **Mobile-Optimized**: Responsive camera controls and large buttons
 
-#### Custom Gesture Training 🎓
-- **Record Custom Gestures**: 3-second video recordings
-- **Hand Landmark Extraction**: Uses MediaPipe landmarks
-- **Gesture Storage**: Saved to localStorage
-- **Management UI**: View, delete custom gestures
-- **Sample Tracking**: Shows number of samples per gesture
-
-#### Hybrid Recognition System
-- **Dual Detection**: Pretrained + custom gestures
-- **Euclidean Distance Matching**: For custom gestures
-- **Priority System**: Custom gestures checked first
-- **Confidence Threshold**: 70% minimum for speaking
-- **Speech Synthesis**: Speaks detected gestures aloud
+#### Sentiment-Aware Translation
+- **Emotion Detection**: Analyzes sign language text for negative sentiments
+- **Keywords**: Sad, angry, frustrated, lonely, scared, anxious, depressed, hopeless, lost
+- **Wellness Triggers**: Opens MindMate chat when negative emotions detected
+- **AI Support**: Empathetic prompts like "I noticed you might be feeling down. Want to talk?"
 
 ### 3. Auto-Response Mode 🤖
 
-#### Profile System
-- **User Information**: Name, about, occupation
-- **Custom Greetings**: Personalized hello messages
-- **Custom Introductions**: Auto-generated introductions
-- **localStorage Persistence**: Profiles saved locally
+#### Simplified Profile Setup
+- **Required Fields**: Name only (for personalization)
+- **Optional Fields**: About me, custom greeting, custom introduction
+- **Quick Setup**: Minimal friction for new users
+- **localStorage Persistence**: Privacy-first local storage
 
 #### Automatic Conversation Handling
-When auto-response mode is enabled:
-- Detects greeting gestures → speaks custom greeting
-- Detects introduction gestures → introduces user automatically
-- Detects "thanks" gestures → responds with "You're welcome"
-- Detects "help" gestures → offers assistance
-- **AI Integration**: Can escalate to GPT-4o-mini for follow-up responses
+When enabled, AI responds automatically to:
+- **Greetings** (hello, hi gestures) → Speaks custom greeting or default
+- **Introductions** (introduce, meet gestures) → Introduces user with profile details
+- **Gratitude** (thanks, thank you) → "You're welcome"
+- **Help Requests** (help, assist) → "How can I help you?"
 
-#### Conversation History
-- Tracks recent auto-responses
-- Displays last 3 interactions
-- Shows gesture → response mapping
-- Timestamp tracking
+### 4. Emergency Features 🆘
 
-### 4. Design & UX
-- Beautiful gradient UI (indigo/purple theme)
-- Responsive design (mobile-friendly)
-- Tab-based navigation
-- Modal dialogs for training and profile setup
-- Accessible color contrast
-- Smooth animations and transitions
-- Loading states and error handling
+#### Quick-Access Emergency Button
+- **Bottom-Left Corner**: Red phone icon for instant emergency calls
+- **One-Tap Access**: No nested menus during emergencies
+- **Mobile-Optimized**: Large, easy-to-tap button
+
+#### Emergency Contacts Management (Settings)
+- **Primary Contact**: Main emergency contact (name + phone)
+- **Secondary Contact**: Backup contact
+- **Quick Dial**: Tap emergency button to choose contact to call
+- **localStorage**: Contacts saved locally for privacy
+
+### 5. Dark/Light Theme System 🌓
+
+#### Theme Context Provider
+- **React Context API**: Global theme state management
+- **localStorage Persistence**: Theme preference saved across sessions
+- **Tailwind Dark Mode**: Uses class-based dark mode strategy
+- **Font Color Adaptation**: Text colors adjust for readability in both themes
+
+#### Theme Toggle (Settings Panel)
+- **Top-Right Settings**: Gear icon opens settings modal
+- **Toggle Switch**: Visual switch for dark/light mode
+- **Instant Apply**: No page refresh required
+- **Accessible**: High contrast in both themes
+
+### 6. Mobile-First Design & UX
+- **Single-Page Layout**: No tabs, streamlined for mobile screens
+- **Fixed Position Controls**: Emergency + MindMate always accessible
+- **Large Touch Targets**: Buttons optimized for finger taps
+- **Gradient UI**: Beautiful indigo/purple theme with accessibility
+- **Responsive**: Works on phones, tablets, and desktops
+- **Loading States**: Clear feedback for all async operations
+- **Error Handling**: User-friendly error messages with recovery suggestions
 
 ## Environment Setup
 
