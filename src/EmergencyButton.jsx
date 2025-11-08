@@ -34,7 +34,7 @@ function EmergencyButton() {
 
       {showDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className={`${isDark ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'} rounded-2xl shadow-2xl max-w-md w-full p-6`}>
+          <div className={`${isDark ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'} rounded-2xl shadow-2xl max-w-sm w-full p-6`}>
             <h2 className="text-2xl font-bold mb-4 text-red-600">Emergency Call</h2>
             
             {!contacts.primary && !contacts.secondary ? (

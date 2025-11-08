@@ -74,12 +74,11 @@ function AppContent() {
 
       {/* Modals */}
       <Settings isOpen={showSettings} onClose={() => setShowSettings(false)} />
-      {showProfile && (
-        <MobileProfileSetup
-          onClose={() => setShowProfile(false)}
-          onSave={handleProfileSave}
-        />
-      )}
+      <MobileProfileSetup
+        isOpen={showProfile}
+        onClose={() => setShowProfile(false)}
+        onSave={handleProfileSave}
+      />
     </div>
   );
 }
