@@ -43,7 +43,8 @@ EmpathAI is a mobile-first web application designed for hearing-impaired users, 
     ├── ThemeContext.jsx            # Dark/light theme provider
     ├── Settings.jsx                # Top-right settings panel
     ├── SentimentDetector.js        # Emotion keyword detection
-    ├── SimplifiedProfile.jsx       # Streamlined profile setup
+    ├── MobileProfileSetup.jsx      # Streamlined profile setup
+    ├── EmergencyButton.jsx         # Emergency call button component
     └── styles.css                  # Global styles + Tailwind
 ```
 
