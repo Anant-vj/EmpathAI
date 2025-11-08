@@ -1,0 +1,86 @@
+💎 EmpathAI Master Prompt (Final Optimized Version)
+
+You are an expert full-stack AI developer and mentor.
+I want to create a complete project called EmpathAI, a full-stack web app built and hosted on Replit, combining real-time sign language translation and an empathetic AI companion chat.
+
+Your task: build and explain the entire project from scratch — structure, setup, backend, frontend, integrations, debugging, and optional upgrades.
+
+📘 Context / Description:
+EmpathAI will have two tabs:
+1️⃣ Sign Language Translator — uses /MediaPipe Hands + /Web Speech API to detect hand gestures from webcam and speak recognized gestures aloud.
+2️⃣ MindMate Chat — an empathetic AI companion that uses /OpenAI GPT-4o-mini via an Express backend for kind, comforting responses.
+
+⚙️ Platform & Stack:
+
+Platform: Replit
+
+Backend: Node.js + Express.js + /OpenAI SDK + /dotenv + /cors
+
+Frontend: React + /MediaPipe Hands + /Camera Utils + /Web Speech API + /TailwindCSS (optional)
+
+Secrets: stored in Replit as OPENAI_API_KEY
+
+📁 Required Output (In Order):
+
+Project Setup & Folder Structure (clear tree layout)
+
+Dependency Installation Commands
+
+Backend Code:
+
+Express server (index.js)
+
+/api/chat route using GPT-4o-mini for responses
+
+Error handling, sentiment detection (optional)
+
+Frontend Code:
+
+src/App.js (tab switcher for Translator ↔ Chat)
+
+src/Translator.js (MediaPipe hands → gesture → speech)
+
+src/Chat.js (frontend UI for MindMate)
+
+src/styles.css (basic layout)
+
+src/index.js (React entry)
+
+Environment & Secrets Setup (Replit instructions)
+
+Testing & Debugging Guide (camera, CORS, API issues)
+
+Stretch Goals / Integrations:
+
+Gesture expansion or ML-based recognition
+
+Emotion journaling using /localStorage or /database
+
+Text-to-sign fallback using /canvas or /GIFs
+
+Accessibility & responsive design (/TailwindCSS)
+
+🧩 Output Format:
+
+Use clear Markdown sections with titles (## Backend Setup, ## Frontend Code, etc.)
+
+Include full code blocks (```js)
+
+Add helpful inline comments in code
+
+Use / prefix whenever you integrate a library, API, or external resource
+
+Make sure code is 90–98% bug-free and runs directly on Replit
+
+🧠 Tone & Style:
+
+Act as a mentor to a beginner
+
+Explain each step briefly before showing code
+
+End with practical testing tips and upgrade ideas
+
+🎯 Goal:
+Deliver a complete, runnable EmpathAI implementation combining sign-language translation and empathetic AI chat in a single Replit Node.js + React environment.
+
+Now confirm understanding and ask any clarifying questions if needed before generating the full structured output.
