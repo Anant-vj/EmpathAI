@@ -29,19 +29,33 @@ function MobileTranslator({ onWellnessPrompt }) {
           'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
         );
 
-        const recognizer = await GestureRecognizer.createFromOptions(vision, {
-          baseOptions: {
-            modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task',
-            delegate: 'GPU'
-          },
-          runningMode: 'VIDEO',
-          numHands: 2
-        });
+        let recognizer;
+        try {
+          recognizer = await GestureRecognizer.createFromOptions(vision, {
+            baseOptions: {
+              modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task',
+              delegate: 'GPU'
+            },
+            runningMode: 'VIDEO',
+            numHands: 2
+          });
+        } catch (gpuError) {
+          console.warn('GPU initialization failed, falling back to CPU:', gpuError);
+          recognizer = await GestureRecognizer.createFromOptions(vision, {
+            baseOptions: {
+              modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task',
+              delegate: 'CPU'
+            },
+            runningMode: 'VIDEO',
+            numHands: 2
+          });
+        }
 
         setGestureRecognizer(recognizer);
+        setError('');
       } catch (err) {
         console.error('Failed to initialize gesture recognizer:', err);
-        setError('Failed to load MediaPipe. Please refresh the page.');
+        setError('Unable to load gesture recognition. This device may not support the required features.');
       }
     };
 
