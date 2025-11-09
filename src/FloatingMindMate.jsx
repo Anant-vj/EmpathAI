@@ -16,6 +16,8 @@ function FloatingMindMate({ initialMessage = '' }) {
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState(null);
   const [personality, setPersonality] = useState('listener');
+  const [autoResponseEnabled, setAutoResponseEnabled] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
   const [showPersonalitySelector, setShowPersonalitySelector] = useState(false);
   const messagesEndRef = useRef(null);
   const { isDark } = useTheme();
@@ -54,6 +56,31 @@ function FloatingMindMate({ initialMessage = '' }) {
     }
   }, [isOpen]);
 
+  // ✅ Check if profile exists and enable auto-response automatically
+  useEffect(() => {
+    const savedProfile = localStorage.getItem("userProfile");
+    const autoFlag = localStorage.getItem("autoResponseEnabled");
+
+    if (savedProfile) {
+      setUserProfile(JSON.parse(savedProfile));
+      setAutoResponseEnabled(autoFlag === "true");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (autoResponseEnabled && userProfile && isOpen && messages.length === 1) {
+      const greet = userProfile.greeting || `Hi ${userProfile.name || 'there'}! It's great to see you again.`;
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: greet,
+        timestamp: new Date().toISOString()
+      }]);
+    }
+  }, [autoResponseEnabled, userProfile, isOpen]);
+
+
+
+
   const handleSendMessage = async (customMessage = null) => {
     const messageText = customMessage || input.trim();
     if (!messageText || loading) return;
@@ -87,11 +114,13 @@ function FloatingMindMate({ initialMessage = '' }) {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           message: messageText,
           personality,
-          sessionId
+          sessionId,
+          profile: userProfile || {}
         }),
+
       });
 
       if (!response.ok) {
@@ -129,9 +158,8 @@ function FloatingMindMate({ initialMessage = '' }) {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className={`fixed bottom-6 right-6 w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 z-50 ${
-            isDark ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700'
-          }`}
+          className={`fixed bottom-6 right-6 w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 z-50 ${isDark ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700'
+            }`}
           aria-label="Open MindMate"
         >
           <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -142,9 +170,8 @@ function FloatingMindMate({ initialMessage = '' }) {
       )}
 
       {isOpen && (
-        <div className={`fixed bottom-6 right-6 w-full max-w-sm sm:max-w-md md:w-96 h-[85vh] max-h-[600px] rounded-2xl shadow-2xl flex flex-col z-50 mx-4 sm:mx-0 ${
-          isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white'
-        }`}>
+        <div className={`fixed bottom-6 right-6 w-full max-w-sm sm:max-w-md md:w-96 h-[85vh] max-h-[600px] rounded-2xl shadow-2xl flex flex-col z-50 mx-4 sm:mx-0 ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white'
+          }`}>
           <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 rounded-t-2xl flex justify-between items-center">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
@@ -153,7 +180,11 @@ function FloatingMindMate({ initialMessage = '' }) {
                 </svg>
               </div>
               <div>
-                <h3 className="text-white font-semibold">MindMate</h3>
+                <h3 className="text-white font-semibold">MindMate
+                  {autoResponseEnabled && (
+                    <span className="text-xs bg-green-500 text-white px-2 py-1 rounded-full">Auto</span>
+                  )}
+                </h3>
                 <p className="text-indigo-100 text-xs">Your AI Companion</p>
               </div>
             </div>
@@ -183,24 +214,22 @@ function FloatingMindMate({ initialMessage = '' }) {
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                    msg.role === 'user'
-                      ? msg.hasCrisis
-                        ? 'bg-red-600 text-white border-2 border-red-400'
-                        : 'bg-indigo-600 text-white'
-                      : msg.isError
+                  className={`max-w-[80%] rounded-2xl px-4 py-2 ${msg.role === 'user'
+                    ? msg.hasCrisis
+                      ? 'bg-red-600 text-white border-2 border-red-400'
+                      : 'bg-indigo-600 text-white'
+                    : msg.isError
                       ? 'bg-red-100 text-red-800'
                       : msg.isCrisis
-                      ? 'bg-amber-50 text-amber-900 border-2 border-amber-400'
-                      : isDark
-                      ? 'bg-gray-800 text-gray-100 border border-gray-700'
-                      : 'bg-white text-gray-800 shadow'
-                  }`}
+                        ? 'bg-amber-50 text-amber-900 border-2 border-amber-400'
+                        : isDark
+                          ? 'bg-gray-800 text-gray-100 border border-gray-700'
+                          : 'bg-white text-gray-800 shadow'
+                    }`}
                 >
                   <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                  <p className={`text-xs mt-1 ${
-                    msg.role === 'user' ? 'text-indigo-200' : msg.isCrisis ? 'text-amber-700' : isDark ? 'text-gray-500' : 'text-gray-400'
-                  }`}>
+                  <p className={`text-xs mt-1 ${msg.role === 'user' ? 'text-indigo-200' : msg.isCrisis ? 'text-amber-700' : isDark ? 'text-gray-500' : 'text-gray-400'
+                    }`}>
                     {new Date(msg.timestamp).toLocaleTimeString()}
                   </p>
                 </div>
@@ -211,8 +240,8 @@ function FloatingMindMate({ initialMessage = '' }) {
                 <div className={`rounded-2xl px-4 py-2 ${isDark ? 'bg-gray-800' : 'bg-white shadow'}`}>
                   <div className="flex space-x-2">
                     <div className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                    <div className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                    <div className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                   </div>
                 </div>
               </div>
@@ -227,9 +256,8 @@ function FloatingMindMate({ initialMessage = '' }) {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Share your feelings..."
-                className={`flex-1 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm ${
-                  isDark ? 'bg-gray-900 text-gray-100 border-gray-700' : 'bg-gray-50 text-gray-900 border-gray-300'
-                } border`}
+                className={`flex-1 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm ${isDark ? 'bg-gray-900 text-gray-100 border-gray-700' : 'bg-gray-50 text-gray-900 border-gray-300'
+                  } border`}
                 rows="2"
                 disabled={loading}
               />

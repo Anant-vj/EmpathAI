@@ -20,6 +20,7 @@ function MobileProfileSetup({ isOpen, onClose, onSave }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     localStorage.setItem('userProfile', JSON.stringify(formData));
+    localStorage.setItem('autoResponseEnabled', 'true');
     if (onSave) onSave(formData);
     onClose();
   };

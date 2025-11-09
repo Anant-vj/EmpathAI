@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
@@ -14,13 +15,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
+
 
 app.use(cors());
 app.use(express.json());
 
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY 
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
 });
 
 const PERSONALITIES = {
@@ -47,7 +49,7 @@ app.post('/api/chat', async (req, res) => {
     }
 
     const personalityConfig = PERSONALITIES[personality] || PERSONALITIES.listener;
-    
+
     const basePrompt = `You are MindMate, a deeply compassionate and empathetic AI companion specifically designed to support hearing-impaired individuals. Your role is to:
 
 1. **Listen with Empathy**: Acknowledge feelings without judgment, validate emotions, and create a safe space for expression.
@@ -98,28 +100,28 @@ Keep responses compassionate yet concise (2-4 sentences). Prioritize emotional c
       }
     }
 
-    res.json({ 
+    res.json({
       response: aiResponse,
       timestamp: new Date().toISOString()
     });
 
   } catch (error) {
     console.error('Chat API Error:', error.message);
-    
+
     if (error.code === 'insufficient_quota') {
-      return res.status(429).json({ 
-        error: 'API quota exceeded. Please check your OpenAI account.' 
-      });
-    }
-    
-    if (error.code === 'invalid_api_key') {
-      return res.status(401).json({ 
-        error: 'Invalid API key. Please check your OPENAI_API_KEY.' 
+      return res.status(429).json({
+        error: 'API quota exceeded. Please check your OpenAI account.'
       });
     }
 
-    res.status(500).json({ 
-      error: 'Failed to get AI response. Please try again.' 
+    if (error.code === 'invalid_api_key') {
+      return res.status(401).json({
+        error: 'Invalid API key. Please check your OPENAI_API_KEY.'
+      });
+    }
+
+    res.status(500).json({
+      error: 'Failed to get AI response. Please try again.'
     });
   }
 });
